@@ -1,0 +1,77 @@
+Here’s the modified full code with the ability to upload images using google.colab:
+
+Full Code for Google Colab
+
+# Step 1: Clone the repository and install dependencies
+!git clone https://github.com/OpenBMB/MiniCPM-V.git
+%cd MiniCPM-V
+
+# Install required dependencies
+!pip install -r requirements.txt
+
+# Step 2: Import necessary libraries
+import torch
+from PIL import Image
+from transformers import AutoModel, AutoTokenizer
+from google.colab import files
+
+# Step 3: Upload images
+# Use this block to upload the images to Colab
+print("Please upload your image files (e.g., image1.jpg, image2.jpg):")
+uploaded = files.upload()
+
+# Rename the uploaded files to standard names for easier reference
+import os
+os.rename(list(uploaded.keys())[0], "image1.jpg")
+os.rename(list(uploaded.keys())[1], "image2.jpg")
+
+# Step 4: Load the model and tokenizer
+# Load the MiniCPM-V model
+model = AutoModel.from_pretrained(
+    'openbmb/MiniCPM-V-2.6',
+    trust_remote_code=True,
+    attn_implementation='sdpa',
+    torch_dtype=torch.float16  # Using float16 for better efficiency
+)
+model = model.eval().cuda()  # Set to evaluation mode and load to GPU if available
+
+# Load the tokenizer
+tokenizer = AutoTokenizer.from_pretrained(
+    'openbmb/MiniCPM-V-2.6',
+    trust_remote_code=True
+)
+
+# Step 5: Prepare the images
+# Load and preprocess images
+image1 = Image.open('image1.jpg').convert('RGB')
+image2 = Image.open('image2.jpg').convert('RGB')
+
+# Step 6: Formulate the query
+# Define the user question
+question = "Compare image 1 and image 2, tell me about the differences between image 1 and image 2."
+
+# Create the input message for the model
+msgs = [
+    {'role': 'user', 'content': [image1, image2, question]}
+]
+
+# Step 7: Generate the answer
+# Pass the images and question to the model
+answer = model.chat(
+    image=None,  # Set to None because images are passed in the content
+    msgs=msgs,
+    tokenizer=tokenizer
+)
+
+# Print the generated response
+print("Model's Response:")
+print(answer)
+
+Execution Instructions
+
+	1.	Copy and paste the code into a Google Colab notebook.
+	2.	Run each cell step by step.
+	3.	When prompted to upload images, upload two image files.
+	4.	The model will analyze the images and provide a comparison in the output.
+
+Let me know if you need further clarifications!
